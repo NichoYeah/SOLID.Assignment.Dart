@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'package:test/test.dart';
-import 'package:solid_assignment/domain/entities/circle.dart';
-import 'package:solid_assignment/domain/entities/right_angled_triangle.dart';
-import 'package:solid_assignment/domain/entities/square.dart';
+import 'package:solid_assignment/features/area_calculation/domain/entities/circle.dart';
+import 'package:solid_assignment/features/area_calculation/domain/entities/right_angled_triangle.dart';
+import 'package:solid_assignment/features/area_calculation/domain/entities/square.dart';
 
 void main() {
   group('Shape area', () {

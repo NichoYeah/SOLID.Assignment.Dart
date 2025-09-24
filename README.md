@@ -2,15 +2,13 @@
 
 ## Overview
 
-This project refactors an initial imperative `main.dart` script that randomly created a circle and right-angled triangle, calculated their areas, and printed which was largest. The refactored version applies a layered architecture (Domain, Application/BLoC, Presentation) and clean naming conventions while adding support for a new `Square` shape without modifying existing shape-related logic (Open/Closed Principle).
+This project refactors an initial imperative `main.dart` script that randomly created a circle and right-angled triangle, calculated their areas, and printed which was largest. The refactored version now implements a Flutter UI with a layered architecture (Domain + Presentation; Data deferred) and clean naming conventions while adding support for a new `Square` shape without modifying existing shape-related logic (Open/Closed Principle).
 
 ## Layered Architecture
 
-- **Domain Layer**: Pure business logic. Contains `Shape` abstraction, entity implementations (`Circle`, `RightAngledTriangle`, `Square`), service (`RandomShapeFactory`), and use case interfaces (`LargestShapeFinder`, `ShapeAreaFormatter`) with their implementations.
-  - Use case abstractions now declared using Dart's `abstract interface class` for explicit interface semantics (Dart 3 feature) to emphasize contract-based design.
-- **Application Layer (BLoC)**: `ShapeBloc` orchestrates generation and evaluation of shapes via domain interfaces. Responds to `GenerateRandomShapes` events, emitting `ShapeState` variants.
-- **Presentation Layer** (Flutter): `ShapeCalculationPage` (UI) + `ShapeCalculationBloc` manage user-entered dimensions and show computed areas & largest shape.
-- **Composition Root**: `lib/main.dart` wires implementations (Domain abstractions into BLoC) – Data layer intentionally deferred.
+- **Domain Layer**: Pure business logic. Contains `Shape` abstraction, entity implementations (`Circle`, `RightAngledTriangle`, `Square`), service (`RandomShapeFactory` - currently unused in UI), and use case interfaces declared with Dart's `abstract interface class` (`LargestShapeFinder`, `ShapesComputationUseCase`) plus their implementations.
+- **Core UI Layer (Flutter)**: Located under `lib/core/ui/` containing `ShapeCalculationPage` (UI) + `ShapeCalculationBloc` (state management) depending only on domain interfaces.
+- **Composition Root**: `lib/main.dart` wires interface implementations; future Data layer can be injected without touching core UI.
 
 ## Added Shape: Square
 
@@ -23,10 +21,10 @@ The `Square` entity was introduced by simply adding `square.dart` and registerin
 Each class has one reason to change:
 
 - Entities (`Circle`, `Square`, etc.) only model geometry & area calculation.
-- Use case implementations (`LargestShapeFinderImpl`, `ShapeAreaFormatterImpl`) each handle one operation.
-- `ShapeBloc` manages state transitions only.
-- `ShapeConsoleView` handles console I/O only.
-- `RandomShapeFactory` encapsulates random creation logic.
+- Use case implementations (`LargestShapeFinderImpl`, `ShapesComputationUseCaseImpl`) each handle one operation.
+- `ShapeCalculationBloc` manages state transitions only.
+- `ShapeCalculationPage` renders UI only.
+- `RandomShapeFactory` (when used) encapsulates random creation logic.
 
 ### 2. Open/Closed Principle (OCP)
 
@@ -45,22 +43,21 @@ All concrete shapes implement `Shape` and can be substituted anywhere a `Shape` 
 
 Clients depend only on what they use:
 
-- View depends on `ShapeAreaFormatter` not a larger utility class.
-- BLoC depends on `LargestShapeFinder` and `ShapeFactory` separately.
+Presentation depends only on the narrow interfaces it needs (`ShapesComputationUseCase`, which itself depends on `LargestShapeFinder`).
 
 No class is forced to implement unused members.
 
 ### 5. Dependency Inversion Principle (DIP)
 
-High-level modules (`ShapeCalculationBloc`, `ShapeCalculationPage`) depend on abstractions (`ShapesComputationUseCase`, `LargestShapeFinder`). Concrete implementations are supplied at composition root (`main.dart`).
+High-level modules (`ShapeCalculationBloc`, `ShapeCalculationPage`) depend on abstractions (`ShapesComputationUseCase`, `LargestShapeFinder`). Concrete implementations are supplied at the composition root (`main.dart`).
 
 ## Naming Conventions & Guidelines Compliance
 
-- **Detailed & Clear**: Files like `largest_shape_finder.dart`, `shape_area_formatter.dart`, `shape_console_view.dart` describe purpose precisely.
+- **Detailed & Clear**: Files like `largest_shape_finder_impl.dart`, `shapes_computation_use_case_impl.dart`, `shape_calculation_bloc.dart` describe purpose precisely.
 - **Package/File Naming**: All lowercase with underscores per Dart guidelines.
 - **Singular Nouns**: Entity files (`circle.dart`, `square.dart`, `shape_console_view.dart`) use singular context.
 - **PascalCase Types**: All classes (`ShapeConsoleView`, `ShapeBloc`, `LargestShapeFinderImpl`) follow PascalCase.
-- **Module Prefixing**: Shape-related presentation file prefixed with `shape_`; BLoC files grouped under `application/shapes/`.
+- **Module Prefixing**: Shape-related presentation files prefixed with `shape_`; BLoC files grouped under `presentation/bloc/`.
 - **Avoid Acronyms/Abbrev.**: No unclear abbreviations introduced.
 - **Consistency & Reuse**: Interfaces separated to promote future reuse (e.g., alternative formatters, different finder strategies).
 
@@ -117,12 +114,46 @@ flutter build appbundle
 2. Register constructor in `RandomShapeFactory` generators.
 3. Run—automatically included in random selection.
 
+## Mirrored Test Directory Structure
+
+Tests mirror the `lib/` layout for fast navigation:
+
+```text
+lib/
+  core/
+    ui/
+      bloc/                  # shape_calculation_bloc.dart (+ event/state)
+      pages/                 # shape_calculation_page.dart
+  domain/
+    entities/
+    usecases/
+      contracts/
+      implementations/
+
+test/
+  domain/
+    entities/                # shape_area_test.dart
+    usecases/
+      implementations/        # largest_shape_finder_impl_test.dart, shapes_computation_use_case_impl_test.dart
+  presentation/               # (legacy directory retained only if older tests remain) 
+    bloc/                     # shape_calculation_bloc_test.dart (will migrate to core/ui bloc path if reorganized)
+  pages/                    # shape_calculation_page_test.dart
+```
+
+Benefits:
+
+- Easier discoverability (jump from `lib/...` file to corresponding `test/...` path).
+- Encourages focused test ownership per layer.
+- Scales cleanly when adding Data layer (`test/data/...`).
+
 ## Potential Further Improvements
 
 - Add repository interfaces & data layer (e.g., persistence of last inputs).
-- Add form validation & error highlighting per field.
-- Introduce dependency injection (e.g., `get_it`).
-- Add widget & BLoC tests (goldens, state tests).
+- Add per-field validation and UI error states.
+- Introduce dependency injection container (e.g., `get_it`) for cleaner composition root & easier overrides in tests.
+- Golden tests for visual regression of `ShapeCalculationPage`.
+- Contract tests ensuring all `Shape` implementations meet invariants (e.g., non-negative area).
+- Performance / property-based tests for large numeric ranges.
 
 ## License
 

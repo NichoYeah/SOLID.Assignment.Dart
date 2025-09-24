@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'domain/usecases/contracts/shapes_computation_use_case.dart';
-import 'domain/usecases/implementations/largest_shape_finder_impl.dart';
-import 'domain/usecases/implementations/shapes_computation_use_case_impl.dart';
-import 'presentation/bloc/shape_calculation_bloc.dart';
-import 'presentation/pages/shape_calculation_page.dart';
+import 'features/area_calculation/domain/usecases/contracts/shapes_computation_use_case.dart';
+import 'features/area_calculation/domain/usecases/implementations/largest_shape_finder_impl.dart';
+import 'features/area_calculation/domain/usecases/implementations/shapes_computation_use_case_impl.dart';
+import 'features/area_calculation/presentation/bloc/shape_calculation_bloc.dart';
+import 'core/ui/pages/shape_calculation_page.dart';
 
 void main() {
   final largestFinder = LargestShapeFinderImpl();
