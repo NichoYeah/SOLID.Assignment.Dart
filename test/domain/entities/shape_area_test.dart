@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:test/test.dart';
 import 'package:solid_assignment/features/area_calculation/domain/entities/circle.dart';
 import 'package:solid_assignment/features/area_calculation/domain/entities/right_angled_triangle.dart';
-import 'package:solid_assignment/features/area_calculation/domain/entities/square.dart';
 
 void main() {
   group('Shape area', () {
@@ -16,9 +15,5 @@ void main() {
       expect(t.area(), 12);
     });
 
-    test('Square area', () {
-      final s = Square(5);
-      expect(s.area(), 25);
-    });
   });
 }

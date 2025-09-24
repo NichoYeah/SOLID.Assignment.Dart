@@ -5,6 +5,5 @@ abstract interface class ShapesComputationUseCase {
     required int circleRadius,
     required int triangleWidth,
     required int triangleHeight,
-    required int squareSide,
   });
 }

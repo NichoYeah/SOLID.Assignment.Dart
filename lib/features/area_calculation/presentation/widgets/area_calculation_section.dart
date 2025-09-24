@@ -16,14 +16,12 @@ class _AreaCalculationSectionState extends State<AreaCalculationSection> {
   final _circleCtrl = TextEditingController(text: '3');
   final _triangleWidthCtrl = TextEditingController(text: '4');
   final _triangleHeightCtrl = TextEditingController(text: '5');
-  final _squareSideCtrl = TextEditingController(text: '6');
 
   @override
   void dispose() {
     _circleCtrl.dispose();
     _triangleWidthCtrl.dispose();
     _triangleHeightCtrl.dispose();
-    _squareSideCtrl.dispose();
     super.dispose();
   }
 
@@ -37,7 +35,6 @@ class _AreaCalculationSectionState extends State<AreaCalculationSection> {
         _numberField('Circle radius', _circleCtrl),
         _numberField('Triangle width', _triangleWidthCtrl),
         _numberField('Triangle height', _triangleHeightCtrl),
-        _numberField('Square side', _squareSideCtrl),
         const SizedBox(height: 12),
         ElevatedButton(
           onPressed: () {
@@ -46,7 +43,6 @@ class _AreaCalculationSectionState extends State<AreaCalculationSection> {
                     circleRadius: _parse(_circleCtrl),
                     triangleWidth: _parse(_triangleWidthCtrl),
                     triangleHeight: _parse(_triangleHeightCtrl),
-                    squareSide: _parse(_squareSideCtrl),
                   ),
                 );
           },

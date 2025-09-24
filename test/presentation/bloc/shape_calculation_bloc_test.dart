@@ -8,7 +8,6 @@ import 'package:solid_assignment/features/area_calculation/domain/usecases/contr
 import 'package:solid_assignment/features/area_calculation/domain/entities/shapes_summary.dart';
 import 'package:solid_assignment/features/area_calculation/domain/entities/circle.dart';
 import 'package:solid_assignment/features/area_calculation/domain/entities/right_angled_triangle.dart';
-import 'package:solid_assignment/features/area_calculation/domain/entities/square.dart';
 
 class MockShapesComputationUseCase extends Mock implements ShapesComputationUseCase {}
 
@@ -20,7 +19,7 @@ void main() {
   });
 
   group('ShapeCalculationBloc', () {
-    final shapes = [Circle(3), RightAngledTriangle(4, 5), Square(6)];
+  final shapes = [Circle(3), RightAngledTriangle(4, 5)];
     final summary = ShapesSummary(shapes: shapes, largest: shapes.last);
 
     blocTest<ShapeCalculationBloc, ShapeCalculationState>(
@@ -30,11 +29,10 @@ void main() {
               circleRadius: any(named: 'circleRadius'),
               triangleWidth: any(named: 'triangleWidth'),
               triangleHeight: any(named: 'triangleHeight'),
-              squareSide: any(named: 'squareSide'),
             )).thenReturn(summary);
         return ShapeCalculationBloc(useCase: mockUseCase);
       },
-      act: (bloc) => bloc.add(ShapeCalculatePressed(circleRadius: 3, triangleWidth: 4, triangleHeight: 5, squareSide: 6)),
+      act: (bloc) => bloc.add(ShapeCalculatePressed(circleRadius: 3, triangleWidth: 4, triangleHeight: 5)),
       expect: () => [
         isA<ShapeCalculationLoading>(),
         isA<ShapeCalculationSuccess>().having((s) => (s.summary.largest), 'largest', summary.largest),
@@ -44,7 +42,6 @@ void main() {
               circleRadius: 3,
               triangleWidth: 4,
               triangleHeight: 5,
-              squareSide: 6,
             )).called(1);
       },
     );
@@ -56,11 +53,10 @@ void main() {
               circleRadius: any(named: 'circleRadius'),
               triangleWidth: any(named: 'triangleWidth'),
               triangleHeight: any(named: 'triangleHeight'),
-              squareSide: any(named: 'squareSide'),
             )).thenThrow(ArgumentError('All dimensions must be > 0'));
         return ShapeCalculationBloc(useCase: mockUseCase);
       },
-      act: (bloc) => bloc.add(ShapeCalculatePressed(circleRadius: 0, triangleWidth: 4, triangleHeight: 5, squareSide: 6)),
+      act: (bloc) => bloc.add(ShapeCalculatePressed(circleRadius: 0, triangleWidth: 4, triangleHeight: 5)),
       expect: () => [
         isA<ShapeCalculationLoading>(),
         isA<ShapeCalculationFailure>().having((f) => f.message, 'message', contains('All dimensions')),

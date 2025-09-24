@@ -17,7 +17,6 @@ class ShapeCalculationBloc extends Bloc<ShapeCalculationEvent, ShapeCalculationS
         circleRadius: event.circleRadius,
         triangleWidth: event.triangleWidth,
         triangleHeight: event.triangleHeight,
-        squareSide: event.squareSide,
       );
       emit(ShapeCalculationSuccess(summary));
     } catch (e) {
