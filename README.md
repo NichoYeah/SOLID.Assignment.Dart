@@ -1,161 +1,89 @@
-# SOLID Assignment (Refactored)
+# SOLID Assignment – Feature-Based Refactor
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture Snapshot](#architecture-snapshot)
+  - [Layer Roles](#layer-roles)
+  - [Barrel Export](#barrel-export)
+- [SOLID Application](#solid-application)
+- [Testing Strategy](#testing-strategy)
+- [Public API (What Consumers Should Import)](#public-api-what-consumers-should-import)
+- [Extending the Feature (Example: Add Rectangle)](#extending-the-feature-example-add-rectangle)
 
 ## Overview
 
-This project refactors an initial imperative `main.dart` script that randomly created a circle and right-angled triangle, calculated their areas, and printed which was largest. The refactored version now implements a Flutter UI with a layered architecture (Domain + Presentation; Data deferred) and clean naming conventions while adding support for a new `Square` shape without modifying existing shape-related logic (Open/Closed Principle).
+Refactored from an imperative `main.dart` script (calculating and comparing a circle and right‑angled triangle) into a feature‑oriented, SOLID‑compliant Flutter codebase. The current scope intentionally supports only `Circle` and `RightAngledTriangle` (the previously added `Square` was removed to align with the original brief).
 
-## Layered Architecture
-
-- **Domain Layer**: Pure business logic. Contains `Shape` abstraction, entity implementations (`Circle`, `RightAngledTriangle`, `Square`), service (`RandomShapeFactory` - currently unused in UI), and use case interfaces declared with Dart's `abstract interface class` (`LargestShapeFinder`, `ShapesComputationUseCase`) plus their implementations.
-- **Core UI Layer (Flutter)**: Located under `lib/core/ui/` containing `ShapeCalculationPage` (UI) + `ShapeCalculationBloc` (state management) depending only on domain interfaces.
-- **Composition Root**: `lib/main.dart` wires interface implementations; future Data layer can be injected without touching core UI.
-
-## Added Shape: Square
-
-The `Square` entity was introduced by simply adding `square.dart` and registering its generator in `RandomShapeFactory`. No existing consumer code (BLoC, view, use cases) required changes—validating Open/Closed compliance for extending behavior.
-
-## SOLID Principles Applied
-
-### 1. Single Responsibility Principle (SRP)
-
-Each class has one reason to change:
-
-- Entities (`Circle`, `Square`, etc.) only model geometry & area calculation.
-- Use case implementations (`LargestShapeFinderImpl`, `ShapesComputationUseCaseImpl`) each handle one operation.
-- `ShapeCalculationBloc` manages state transitions only.
-- `ShapeCalculationPage` renders UI only.
-- `RandomShapeFactory` (when used) encapsulates random creation logic.
-
-### 2. Open/Closed Principle (OCP)
-
-New shapes are added by:
-
-1. Creating a new entity implementing `Shape`.
-2. Registering a generator in `RandomShapeFactory`.
-
-No modifications to use cases, BLoC, or presentation were needed because they work with the `Shape` abstraction.
-
-### 3. Liskov Substitution Principle (LSP)
-
-All concrete shapes implement `Shape` and can be substituted anywhere a `Shape` is expected. Each provides a valid `area()` and `name`. No subclass violates expected behavior (e.g., no unimplemented or exception-throwing overrides).
-
-### 4. Interface Segregation Principle (ISP)
-
-Clients depend only on what they use:
-
-Presentation depends only on the narrow interfaces it needs (`ShapesComputationUseCase`, which itself depends on `LargestShapeFinder`).
-
-No class is forced to implement unused members.
-
-### 5. Dependency Inversion Principle (DIP)
-
-High-level modules (`ShapeCalculationBloc`, `ShapeCalculationPage`) depend on abstractions (`ShapesComputationUseCase`, `LargestShapeFinder`). Concrete implementations are supplied at the composition root (`main.dart`).
-
-## Naming Conventions & Guidelines Compliance
-
-- **Detailed & Clear**: Files like `largest_shape_finder_impl.dart`, `shapes_computation_use_case_impl.dart`, `shape_calculation_bloc.dart` describe purpose precisely.
-- **Package/File Naming**: All lowercase with underscores per Dart guidelines.
-- **Singular Nouns**: Entity files (`circle.dart`, `square.dart`, `shape_console_view.dart`) use singular context.
-- **PascalCase Types**: All classes (`ShapeConsoleView`, `ShapeBloc`, `LargestShapeFinderImpl`) follow PascalCase.
-- **Module Prefixing**: Shape-related presentation files prefixed with `shape_`; BLoC files grouped under `presentation/bloc/`.
-- **Avoid Acronyms/Abbrev.**: No unclear abbreviations introduced.
-- **Consistency & Reuse**: Interfaces separated to promote future reuse (e.g., alternative formatters, different finder strategies).
-
-## Running (Flutter App)
-
-From project root:
-
-```bash
-flutter pub get
-flutter run
-```
-
-### Platform-Specific Commands
-
-Android (debug):
-
-```bash
-flutter run -d android
-```
-
-Web (if enabled):
-
-```bash
-flutter run -d chrome
-```
-
-Windows Desktop (if enabled):
-
-```bash
-flutter run -d windows
-```
-
-iOS (macOS host only):
-
-```bash
-flutter build ios --no-codesign
-```
-
-Release APK:
-
-```bash
-flutter build apk --release
-```
-
-Release App Bundle (Play Store):
-
-```bash
-flutter build appbundle
-```
-
-## Extending With a New Shape Example (e.g., Rectangle)
-
-1. Create `rectangle.dart` implementing `Shape`.
-2. Register constructor in `RandomShapeFactory` generators.
-3. Run—automatically included in random selection.
-
-## Mirrored Test Directory Structure
-
-Tests mirror the `lib/` layout for fast navigation:
+## Architecture Snapshot
 
 ```text
 lib/
   core/
     ui/
-      bloc/                  # shape_calculation_bloc.dart (+ event/state)
-      pages/                 # shape_calculation_page.dart
-  domain/
-    entities/
-    usecases/
-      contracts/
-      implementations/
-
-test/
-  domain/
-    entities/                # shape_area_test.dart
-    usecases/
-      implementations/        # largest_shape_finder_impl_test.dart, shapes_computation_use_case_impl_test.dart
-  presentation/               # (legacy directory retained only if older tests remain) 
-    bloc/                     # shape_calculation_bloc_test.dart (will migrate to core/ui bloc path if reorganized)
-  pages/                    # shape_calculation_page_test.dart
+      pages/                # App-level pages (host feature widgets)
+  features/
+    area_calculation/
+      area_calculation.dart # Barrel (public API of the feature)
+      domain/
+        entities/           # shape.dart, circle.dart, right_angled_triangle.dart
+        usecases/
+          contracts/        # largest_shape_finder.dart, shapes_computation_use_case.dart
+          implementations/  # *Impl classes (internal to feature)
+      presentation/
+        bloc/               # shape_calculation_bloc + events/states (internal)
+        widgets/            # area_calculation_section.dart (public widget)
 ```
 
-Benefits:
+### Layer Roles
 
-- Easier discoverability (jump from `lib/...` file to corresponding `test/...` path).
-- Encourages focused test ownership per layer.
-- Scales cleanly when adding Data layer (`test/data/...`).
+- **Domain**: Pure Dart shapes + use case contracts/implementations; framework‑agnostic, easy to test.
+- **Presentation**: BLoC (`ShapeCalculationBloc`) and UI widgets consuming only contracts & entities.
+- **Core UI**: (Optional) Higher-level pages/shells that host feature widgets without depending on internal implementation details.
 
-## Potential Further Improvements
+### Barrel Export
 
-- Add repository interfaces & data layer (e.g., persistence of last inputs).
-- Add per-field validation and UI error states.
-- Introduce dependency injection container (e.g., `get_it`) for cleaner composition root & easier overrides in tests.
-- Golden tests for visual regression of `ShapeCalculationPage`.
-- Contract tests ensuring all `Shape` implementations meet invariants (e.g., non-negative area).
-- Performance / property-based tests for large numeric ranges.
+Exports ONLY the stable surface:
 
-## License
+- Entities: `Shape`, `Circle`, `RightAngledTriangle`
+- Contracts: `LargestShapeFinder`, `ShapesComputationUseCase`
+- Public widget: `AreaCalculationSection`
 
-Internal assignment example (no license specified).
+Internal implementation details (bloc classes, *Impl use cases) remain unexported, allowing refactors without breaking consumers.
 
+## SOLID Application
+
+| Principle | Applied By |
+|-----------|------------|
+| SRP | Entities model geometry; use cases focus on one responsibility; bloc manages state transitions; widget renders UI. |
+| OCP | New shapes can be added via new entity + inclusion in computation without modifying existing abstractions. |
+| LSP | All shapes honor the `Shape` contract (`area()`, `name`). |
+| ISP | UI depends only on narrow contracts (no leakage of internal implementations). |
+| DIP | Presentation depends on abstractions (`ShapesComputationUseCase`, `LargestShapeFinder`) rather than concrete classes. |
+
+## Testing Strategy
+
+Mirrors feature boundaries:
+
+- Entity geometry: deterministic area calculations.
+- Use cases: combined summary + largest shape selection correctness.
+- Bloc: state sequence (initial → loading → success/failure) for valid & invalid flows.
+- Widget: user interaction → event dispatch → rendered result.
+
+## Public API (What Consumers Should Import)
+
+```dart
+import 'package:solid_assignment/features/area_calculation/area_calculation.dart';
+
+// Provides: Shape, Circle, RightAngledTriangle,
+// LargestShapeFinder, ShapesComputationUseCase,
+// AreaCalculationSection widget.
+```
+
+Implementations are purposely NOT exposed—external code should depend on interfaces and supply its own instances (a DI layer could be added later if needed).
+
+## Extending the Feature (Example: Add Rectangle)
+
+1. Create `rectangle.dart` implementing `Shape`.
+2. Add it to the computation logic (or evolve to a registry/factory if growth continues).
+3. (Optional) Add UI inputs + bloc event fields for rectangle dimensions.

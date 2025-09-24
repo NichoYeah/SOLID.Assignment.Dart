@@ -21,7 +21,7 @@ class ShapeApp extends StatelessWidget {
     return MaterialApp(
       title: 'Shape Calculator',
       home: BlocProvider(
-        create: (_) => ShapeCalculationBloc(useCase: useCase),
+        create: (_) => ShapeCalculationBloc(computeShapeUseCase: useCase),
         child: const ShapeCalculationPage(),
       ),
     );

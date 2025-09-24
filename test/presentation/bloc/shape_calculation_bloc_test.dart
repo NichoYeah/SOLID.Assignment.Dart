@@ -30,7 +30,7 @@ void main() {
               triangleWidth: any(named: 'triangleWidth'),
               triangleHeight: any(named: 'triangleHeight'),
             )).thenReturn(summary);
-        return ShapeCalculationBloc(useCase: mockUseCase);
+        return ShapeCalculationBloc(computeShapeUseCase: mockUseCase);
       },
       act: (bloc) => bloc.add(ShapeCalculatePressed(circleRadius: 3, triangleWidth: 4, triangleHeight: 5)),
       expect: () => [
@@ -54,7 +54,7 @@ void main() {
               triangleWidth: any(named: 'triangleWidth'),
               triangleHeight: any(named: 'triangleHeight'),
             )).thenThrow(ArgumentError('All dimensions must be > 0'));
-        return ShapeCalculationBloc(useCase: mockUseCase);
+        return ShapeCalculationBloc(computeShapeUseCase: mockUseCase);
       },
       act: (bloc) => bloc.add(ShapeCalculatePressed(circleRadius: 0, triangleWidth: 4, triangleHeight: 5)),
       expect: () => [

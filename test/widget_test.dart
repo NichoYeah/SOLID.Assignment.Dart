@@ -9,7 +9,7 @@ import 'package:solid_assignment/core/ui/pages/shape_calculation_page.dart';
 void main() {
   testWidgets('ShapeCalculationPage end-to-end compute flow', (tester) async {
     final bloc = ShapeCalculationBloc(
-      useCase: ShapesComputationUseCaseImpl(largestFinder: LargestShapeFinderImpl()),
+      computeShapeUseCase: ShapesComputationUseCaseImpl(largestFinder: LargestShapeFinderImpl()),
     );
 
     await tester.pumpWidget(MaterialApp(

@@ -1,5 +1,6 @@
 import 'dart:math';
- 
+
+@Deprecated('This was the initial implementation before applying SOLID principles. It is kept for reference only.')
 void main() {
 
   final rnd = Random();
